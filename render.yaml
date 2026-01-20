@@ -1,0 +1,48 @@
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: pss-portal-db
+    env: docker
+    plan: free
+    region: ohio
+    image:
+      url: docker.io/postgres:16-alpine
+    envVars:
+      - key: POSTGRES_USER
+        value: pss_user
+      - key: POSTGRES_PASSWORD
+        generateValue: true
+      - key: POSTGRES_DB
+        value: pss_portal
+    disk:
+      name: postgres-data
+      mountPath: /var/lib/postgresql/data
+      sizeGB: 1
+
+  # .NET API Web Service
+  - type: web
+    name: pss-portal-api
+    env: docker
+    plan: free
+    region: ohio
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://0.0.0.0:8080
+      - key: ConnectionStrings__Default
+        fromDatabase:
+          name: pss-portal-db
+          property: connectionString
+      - key: Jwt__Issuer
+        value: CAP
+      - key: Jwt__Audience
+        value: CAP
+      - key: Jwt__SigningKey
+        generateValue: true
+      - key: Jwt__AccessTokenMinutes
+        value: 30
+      - key: Jwt__RefreshTokenDays
+        value: 7
