@@ -1,23 +1,12 @@
-services:
-  # PostgreSQL Database
-  - type: pserv
-    name: pss-portal-db
-    env: docker
+databases:
+  # PostgreSQL Database (Free tier - 90 days)
+  - name: pss-portal-db
+    databaseName: pss_portal
+    user: pss_user
     plan: free
     region: ohio
-    image:
-      url: docker.io/postgres:16-alpine
-    envVars:
-      - key: POSTGRES_USER
-        value: pss_user
-      - key: POSTGRES_PASSWORD
-        generateValue: true
-      - key: POSTGRES_DB
-        value: pss_portal
-    disk:
-      name: postgres-data
-      mountPath: /var/lib/postgresql/data
-      sizeGB: 1
+
+services:
 
   # .NET API Web Service
   - type: web
