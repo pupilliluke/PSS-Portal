@@ -192,7 +192,7 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = User.FindFirstValue("sub");
         if (userId is null)
         {
             return Ok(new { message = "Logged out successfully" });
@@ -225,7 +225,6 @@ public class AuthController : ControllerBase
         {
             new(JwtRegisteredClaimNames.Sub, user.Id),
             new(JwtRegisteredClaimNames.Email, user.Email!),
-            new(ClaimTypes.NameIdentifier, user.Id),
             new("org_id", orgId.ToString()),
             new("role", role)
         };

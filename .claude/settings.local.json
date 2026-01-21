@@ -14,7 +14,17 @@
       "Bash(git init:*)",
       "Bash(git config:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:pss-portal-api.onrender.com)",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZTk2Mzk2ZC1lMzdmLTQ5MWMtOTcxYi0yZGQ1ZjIxYTExMTQiLCJlbWFpbCI6Iml0ZXJhdGlvbjJ0ZXN0QHBzc3BvcnRhbC5jb20iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6ImVlOTYzOTZkLWUzN2YtNDkxYy05NzFiLTJkZDVmMjFhMTExNCIsIm9yZ19pZCI6ImZhNjNhYWUxLTBkYjAtNGZmOC1hYjRlLTViMTQ1OTU1MmIwZSIsInJvbGUiOiJPd25lciIsImV4cCI6MTc2OTAyMjQxNywiaXNzIjoiQ0FQIiwiYXVkIjoiQ0FQIn0.cgeBCcfE_0ypcFMd4dL1I892uP6LaGo_sZWDtaxRVJA\")",
+      "Bash(__NEW_LINE_14faa0d8761d7249__ echo \"=== Creating Test Audit ===\")",
+      "Bash(__NEW_LINE_bbfa6a5135c3c96c__ curl -s -w \"\\\\nHTTP: %{http_code}\" -X POST \"https://pss-portal-api.onrender.com/api/audits\" -H \"Content-Type: application/json\" -H \"Authorization: Bearer $TOKEN\" -d '{\"\"title\"\": \"\"Q1 2026 Security Audit\"\", \"\"notes\"\": \"\"Comprehensive security review\"\"}')",
+      "Bash(__NEW_LINE_b4b8409fc4c09ba7__ echo \"=== List Audits \\(test auth\\) ===\")",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZTk2Mzk2ZC1lMzdmLTQ5MWMtOTcxYi0yZGQ1ZjIxYTExMTQiLCJlbWFpbCI6Iml0ZXJhdGlvbjJ0ZXN0QHBzc3BvcnRhbC5jb20iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6ImVlOTYzOTZkLWUzN2YtNDkxYy05NzFiLTJkZDVmMjFhMTExNCIsIm9yZ19pZCI6ImZhNjNhYWUxLTBkYjAtNGZmOC1hYjRlLTViMTQ1OTU1MmIwZSIsInJvbGUiOiJPd25lciIsImV4cCI6MTc2OTAyMjU5MCwiaXNzIjoiQ0FQIiwiYXVkIjoiQ0FQIn0.R-VAjFoyj5C74axNNJvUtx_0B2tBXC__fb_FDMkf6d8\")",
+      "Bash(__NEW_LINE_a06d8009f8d771ed__ echo \"=== Creating Audit ===\")"
     ]
   }
 }

@@ -139,7 +139,7 @@ public class AuditsController : ControllerBase
         if (_org.OrganizationId == Guid.Empty)
             return Unauthorized(new { message = "Missing organization context" });
 
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = User.FindFirstValue("sub");
 
         var audit = new Audit
         {

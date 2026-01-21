@@ -33,7 +33,7 @@ public class ActivityLoggingMiddleware
         // Only log mutating operations that succeeded
         if (ShouldLog(context))
         {
-            var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = context.User.FindFirstValue("sub");
             if (userId is null || org.OrganizationId == Guid.Empty) return;
 
             var (entityType, entityId, action) = await ParseRequest(context, responseBody);

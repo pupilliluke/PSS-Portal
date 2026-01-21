@@ -86,7 +86,7 @@ public class AttachmentsController : ControllerBase
                 return BadRequest(new { message = "Audit not found or does not belong to your organization" });
         }
 
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var userId = User.FindFirstValue("sub")!;
         var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Unknown";
 
         // Upload file to storage
