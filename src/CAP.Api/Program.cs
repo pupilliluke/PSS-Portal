@@ -4,6 +4,7 @@ using CAP.Api.Middleware;
 using CAP.Application.Common;
 using CAP.Infrastructure.Auth;
 using CAP.Infrastructure.Data;
+using CAP.Infrastructure.Storage;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -100,6 +101,9 @@ builder.Services.AddCors(options =>
 // Current Organization Context
 builder.Services.AddScoped<ICurrentOrg, CurrentOrgFromClaims>();
 
+// File Storage
+builder.Services.AddScoped<IFileStorage, LocalFileStorage>();
+
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
@@ -165,6 +169,8 @@ app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<CAP.Api.Middleware.ActivityLoggingMiddleware>();
 
 app.MapControllers();
 app.MapHealthChecks("/health");

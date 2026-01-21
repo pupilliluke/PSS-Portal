@@ -12,6 +12,9 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<Organization> Organizations => Set<Organization>();
     public DbSet<OrganizationMember> OrganizationMembers => Set<OrganizationMember>();
     public DbSet<Audit> Audits => Set<Audit>();
+    public DbSet<Finding> Findings => Set<Finding>();
+    public DbSet<ActivityLog> ActivityLogs => Set<ActivityLog>();
+    public DbSet<Attachment> Attachments => Set<Attachment>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -34,6 +37,31 @@ public class AppDbContext : IdentityDbContext<AppUser>
         {
             b.HasIndex(x => x.OrganizationId);
             b.HasIndex(x => new { x.OrganizationId, x.Status, x.CreatedAt });
+        });
+
+        // Finding
+        builder.Entity<Finding>(b =>
+        {
+            b.HasIndex(x => x.OrganizationId);
+            b.HasIndex(x => x.AuditId);
+            b.HasIndex(x => new { x.OrganizationId, x.Status });
+            b.HasIndex(x => new { x.OrganizationId, x.Category });
+        });
+
+        // ActivityLog
+        builder.Entity<ActivityLog>(b =>
+        {
+            b.HasIndex(x => x.OrganizationId);
+            b.HasIndex(x => new { x.OrganizationId, x.Timestamp });
+            b.HasIndex(x => new { x.EntityType, x.EntityId });
+        });
+
+        // Attachment
+        builder.Entity<Attachment>(b =>
+        {
+            b.HasIndex(x => x.OrganizationId);
+            b.HasIndex(x => x.AuditId);
+            b.HasIndex(x => x.StorageKey).IsUnique();
         });
     }
 }
