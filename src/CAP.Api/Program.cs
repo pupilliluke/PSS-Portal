@@ -22,9 +22,17 @@ builder.Host.UseSerilog((ctx, lc) => lc
 
 builder.Services.AddHttpContextAccessor();
 
-// Database
+// Database - Handle Render's DATABASE_URL format
+var connectionString = builder.Configuration.GetConnectionString("Default");
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+if (!string.IsNullOrEmpty(databaseUrl))
+{
+    connectionString = ConvertPostgresUrlToConnectionString(databaseUrl);
+}
+
 builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+    opt.UseNpgsql(connectionString));
 
 // Identity
 builder.Services
@@ -100,7 +108,7 @@ builder.Services.AddControllers();
 
 // Health Checks
 builder.Services.AddHealthChecks()
-    .AddNpgSql(builder.Configuration.GetConnectionString("Default")!);
+    .AddNpgSql(connectionString!);
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -162,6 +170,20 @@ app.MapControllers();
 app.MapHealthChecks("/health");
 
 app.Run();
+
+// Convert Render's postgres:// URL to Npgsql connection string
+static string ConvertPostgresUrlToConnectionString(string databaseUrl)
+{
+    var uri = new Uri(databaseUrl);
+    var userInfo = uri.UserInfo.Split(':');
+    var username = userInfo[0];
+    var password = userInfo.Length > 1 ? userInfo[1] : "";
+    var host = uri.Host;
+    var port = uri.Port > 0 ? uri.Port : 5432;
+    var database = uri.AbsolutePath.TrimStart('/');
+
+    return $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+}
 
 // Make Program accessible for testing
 public partial class Program { }
