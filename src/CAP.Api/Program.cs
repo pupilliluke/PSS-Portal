@@ -150,16 +150,21 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+// Apply pending migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
 // Middleware Pipeline
 app.UseSerilogRequestLogging();
 
 app.UseExceptionHandler("/error");
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Enable Swagger in all environments for API testing
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
