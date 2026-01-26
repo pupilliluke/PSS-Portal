@@ -5,6 +5,7 @@ using CAP.Application.Common;
 using CAP.Infrastructure.Auth;
 using CAP.Infrastructure.Data;
 using CAP.Infrastructure.Storage;
+using CAP.Infrastructure.Google;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -111,6 +112,12 @@ builder.Services.AddScoped<ICurrentOrg, CurrentOrgFromClaims>();
 
 // File Storage
 builder.Services.AddScoped<IFileStorage, LocalFileStorage>();
+
+// HttpClient for external APIs
+builder.Services.AddHttpClient();
+
+// Google Sheets Integration
+builder.Services.AddScoped<IGoogleSheetsService, GoogleSheetsService>();
 
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();

@@ -1,295 +1,239 @@
-# Consulting Audit Portal - Authentication API
+# PSS Portal - Enterprise Lead Generation CRM
 
-## 🎉 Project Status
+A multi-tenant CRM platform with lead management, Google Sheets integration, and pay-per-service billing.
 
-**✅ BOILERPLATE COMPLETE!** You now have a production-ready authentication API with:
+## Project Status
 
-- ✅ Clean Architecture (4 projects: Domain, Application, Infrastructure, API)
-- ✅ ASP.NET Core Identity + JWT authentication
-- ✅ Refresh token support (7-day expiry)
-- ✅ PostgreSQL database (via Docker)
-- ✅ Multi-tenant organization support
-- ✅ Role-based authorization (Owner/Admin/ClientManager/ClientViewer)
-- ✅ Rate limiting (100 requests/minute)
-- ✅ CORS configuration
-- ✅ Health checks
-- ✅ Swagger/OpenAPI documentation
-- ✅ FluentValidation
-- ✅ Structured logging (Serilog)
-- ✅ Global error handling
+**Current Phase:** Leads Module Complete, Billing Next
 
-## 📁 Project Structure
+- [x] Authentication (JWT, refresh tokens)
+- [x] Multi-tenant organizations
+- [x] Audits & Findings (legacy)
+- [x] Activity logging
+- [x] File attachments
+- [x] **Leads CRM module**
+- [x] **Google Sheets import**
+- [ ] Stripe billing (Phase 1)
+- [ ] Core CRM - Contacts, Accounts, Opportunities (Phase 2)
 
-```
-ConsultingAuditPortal/
-├── src/
-│   ├── CAP.Api/              # Web API layer
-│   │   ├── Controllers/
-│   │   │   ├── AuthController.cs     # Register, Login, Refresh, Logout
-│   │   │   └── ErrorController.cs     # Global error handling
-│   │   ├── Middleware/
-│   │   │   └── CurrentOrgFromClaims.cs
-│   │   ├── Program.cs         # App configuration
-│   │   └── appsettings.Development.json
-│   ├── CAP.Domain/           # Domain entities
-│   │   └── Entities/
-│   │       ├── Organization.cs
-│   │       └── OrganizationMember.cs
-│   ├── CAP.Application/      # Business logic
-│   │   └── Common/
-│   │       └── ICurrentOrg.cs
-│   └── CAP.Infrastructure/   # Data access
-│       ├── Auth/
-│       │   └── AppUser.cs    # Identity user with refresh tokens
-│       └── Data/
-│           └── AppDbContext.cs
-├── docker-compose.yml         # PostgreSQL database
-└── README.md                  # This file
-```
+## Quick Start
 
-## 🚀 Quick Start (Next Steps)
+### Prerequisites
 
-### Step 1: Start PostgreSQL Database
+- Docker Desktop
+- .NET 8 SDK
+- Node.js 20+ (for frontend)
+
+### 1. Start PostgreSQL
 
 ```bash
-# Make sure Docker Desktop is running, then:
 docker compose up -d
 ```
 
-This starts PostgreSQL on `localhost:5432` with:
+This starts PostgreSQL on **port 5434** with:
 - Database: `cap_dev`
 - Username: `cap`
 - Password: `cap_password`
 
-### Step 2: Run Database Migrations
+> **Note:** Port 5434 is used to avoid conflicts with local PostgreSQL installations.
 
-Unfortunately, there's an issue with the `dotnet-ef` global tool installation. Here are your options:
-
-**Option A: Use Visual Studio Package Manager Console**
-```powershell
-# In Visual Studio: Tools > NuGet Package Manager > Package Manager Console
-Add-Migration InitialCreate -Project CAP.Infrastructure -StartupProject CAP.Api
-Update-Database -Project CAP.Infrastructure -StartupProject CAP.Api
-```
-
-**Option B: Use dotnet ef bundle (recommended)**
-```bash
-# This creates a standalone executable for migrations
-dotnet ef migrations bundle --project src/CAP.Infrastructure --startup-project src/CAP.Api --output migrations
-./migrations
-```
-
-**Option C: Manual SQL Script**
-```bash
-# Generate SQL script
-dotnet ef migrations script --project src/CAP.Infrastructure --startup-project src/CAP.Api --output migration.sql
-# Then run it manually against PostgreSQL
-```
-
-### Step 3: Run the API
+### 2. Run the API
 
 ```bash
 dotnet run --project src/CAP.Api
 ```
 
-The API will start on:
-- HTTPS: `https://localhost:7xxx`
-- HTTP: `http://localhost:5xxx`
+The API starts on:
+- **http://localhost:5000** (or check console output)
+- Migrations apply automatically on startup
 
-(Exact ports shown in console output)
+### 3. Open Swagger UI
 
-### Step 4: Test with Swagger
+http://localhost:5000/swagger
 
-1. Open browser to `https://localhost:7xxx/swagger`
-2. Try the `/api/auth/register` endpoint:
-   ```json
-   {
-     "email": "demo@test.com",
-     "password": "Test123!",
-     "organizationName": "My Company"
-   }
-   ```
-3. Copy the `accessToken` from the response
-4. Click **"Authorize"** button at top
-5. Enter: `Bearer <paste-token-here>`
-6. Now you can call `/api/auth/logout` or `/api/auth/refresh`
+### 4. Test the API
 
-## 📋 API Endpoints
+```bash
+# Health check
+curl http://localhost:5000/health
 
-### Authentication
+# Register a new user
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"Test1234!","organizationName":"My Company"}'
+```
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/api/auth/register` | Create new user + organization | No |
-| POST | `/api/auth/login` | Login with email/password | No |
-| POST | `/api/auth/refresh` | Get new access token | No |
-| POST | `/api/auth/logout` | Invalidate refresh token | Yes |
+## Test Account (Production)
 
-### System
+```
+Email: iteration2test@pssportal.com
+Password: TestPass1234!
+```
 
+## API Endpoints
+
+### Authentication (4)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Create user + organization |
+| POST | `/api/auth/login` | Login, get tokens |
+| POST | `/api/auth/refresh` | Refresh access token |
+| POST | `/api/auth/logout` | Invalidate refresh token |
+
+### Leads (6)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/leads` | List leads (filter: status, source, search) |
+| GET | `/api/leads/{id}` | Get lead details |
+| POST | `/api/leads` | Create lead |
+| PUT | `/api/leads/{id}` | Update lead |
+| PATCH | `/api/leads/{id}/status` | Change status |
+| DELETE | `/api/leads/{id}` | Delete lead |
+
+### Google Sheets Import (9)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/lead-imports/google/status` | Check connection |
+| GET | `/api/lead-imports/google/auth-url` | Start OAuth |
+| GET | `/api/lead-imports/google/callback` | OAuth callback |
+| DELETE | `/api/lead-imports/google/disconnect` | Remove connection |
+| GET | `/api/lead-imports/google/sheets` | List spreadsheets |
+| POST | `/api/lead-imports/google/preview` | Preview import |
+| POST | `/api/lead-imports/google/import` | Execute import |
+| GET | `/api/lead-imports/batches` | List import history |
+| GET | `/api/lead-imports/batches/{id}` | Get batch details |
+
+### Audits & Findings (12)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET/POST/PUT/PATCH/DELETE | `/api/audits/*` | Audit CRUD |
+| GET/POST/PUT/PATCH/DELETE | `/api/findings/*` | Finding CRUD |
+
+### Activity & Attachments (6)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/activity` | List activity logs |
+| GET | `/api/activity/audits/{id}` | Activity for audit |
+| GET/POST/DELETE | `/api/attachments/*` | File attachments |
+
+### System (1)
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/health` | Health check |
-| GET | `/swagger` | API documentation |
 
-## 🔐 Authentication Flow
+**Total: 32 endpoints**
 
-1. **Register**: Creates user, organization, and returns JWT + refresh token
-2. **Login**: Returns JWT (30 min) + refresh token (7 days)
-3. **Access Token**: Include in requests as `Authorization: Bearer <token>`
-4. **Refresh Token**: When access token expires, call `/refresh` to get new tokens
-5. **Logout**: Invalidates refresh token
+## Project Structure
 
-### JWT Claims
+```
+PSS Portal/
+├── src/
+│   ├── CAP.Api/                 # Web API
+│   │   ├── Controllers/
+│   │   │   ├── AuthController.cs
+│   │   │   ├── LeadsController.cs
+│   │   │   ├── LeadImportsController.cs
+│   │   │   └── ...
+│   │   └── Program.cs
+│   ├── CAP.Domain/              # Entities
+│   │   └── Entities/
+│   │       ├── Lead.cs
+│   │       ├── GoogleConnection.cs
+│   │       └── ...
+│   ├── CAP.Application/         # Interfaces
+│   │   └── Common/
+│   │       ├── ICurrentOrg.cs
+│   │       └── IGoogleSheetsService.cs
+│   └── CAP.Infrastructure/      # Implementations
+│       ├── Data/AppDbContext.cs
+│       └── Google/GoogleSheetsService.cs
+├── frontend/                    # React 19 + Vite
+├── daily-documentation/         # Progress reports
+├── docker-compose.yml
+└── README.md
+```
 
-Each access token contains:
-- `sub`: User ID
-- `email`: User email
-- `org_id`: Organization ID (for multi-tenancy)
-- `role`: User role (Owner/Admin/ClientManager/ClientViewer)
+## Configuration
 
-## 🏗️ Architecture Patterns
-
-### Multi-Tenancy
-- Every user belongs to an organization via `OrganizationMember`
-- JWT contains `org_id` claim
-- `ICurrentOrg` service extracts org from claims
-- Future endpoints will filter queries by `org_id`
-
-### Clean Architecture Layers
-1. **Domain**: Entities only, no dependencies
-2. **Application**: Interfaces and business logic
-3. **Infrastructure**: EF Core, Identity, data access
-4. **API**: Controllers, middleware, configuration
-
-### Security Features
-- Passwords hashed with Identity (PBKDF2)
-- JWT signed with HMAC-SHA256
-- Refresh tokens are cryptographically random (64 bytes)
-- Rate limiting (100 req/min per user)
-- CORS configured for localhost:3000
-- HTTPS required in production
-
-## 📦 Next Steps for 5-Day Goal
-
-### Day 1-2: ✅ DONE
-- [x] Boilerplate setup
-- [x] Authentication endpoints
-- [x] Database configuration
-
-### Day 3: Testing & Polish
-- [ ] Run migrations successfully
-- [ ] Test all auth endpoints
-- [ ] Add integration tests (optional)
-- [ ] Create a simple test script
-
-### Day 4: CI/CD
-- [ ] Create GitHub repository
-- [ ] Push code
-- [ ] Set up GitHub Actions CI
-- [ ] Test build pipeline
-
-### Day 5: Azure Deployment
-- [ ] Create Azure resources:
-  - Azure Database for PostgreSQL (Flexible Server)
-  - Azure App Service (B1 tier)
-  - Azure Key Vault (for JWT secret)
-- [ ] Configure environment variables
-- [ ] Deploy via GitHub Actions
-- [ ] Test deployed endpoints
-
-## 🔧 Configuration
-
-### Development Settings
-
-Located in `src/CAP.Api/appsettings.Development.json`:
+### Development (`appsettings.Development.json`)
 
 ```json
 {
   "ConnectionStrings": {
-    "Default": "Host=localhost;Port=5432;Database=cap_dev;Username=cap;Password=cap_password"
+    "Default": "Host=127.0.0.1;Port=5434;Database=cap_dev;Username=cap;Password=cap_password;..."
   },
   "Jwt": {
-    "Issuer": "CAP",
-    "Audience": "CAP",
-    "SigningKey": "DEV_ONLY_REPLACE_WITH_LONG_RANDOM_SECRET...",
+    "SigningKey": "DEV_ONLY_...",
     "AccessTokenMinutes": 30,
     "RefreshTokenDays": 7
+  },
+  "Google": {
+    "ClientId": "",
+    "ClientSecret": ""
   }
 }
 ```
 
-### Production Settings
+### Google Sheets Setup (Optional)
 
-For Azure deployment, set these as App Service Configuration:
+1. Create Google Cloud project
+2. Enable Google Sheets API and Google Drive API
+3. Create OAuth 2.0 credentials (Web application)
+4. Add redirect URI: `http://localhost:5000/api/lead-imports/google/callback`
+5. Add ClientId and ClientSecret to config
 
-```
-ConnectionStrings__Default = <Azure PostgreSQL connection string>
-Jwt__SigningKey = <Strong random key from Key Vault>
-ASPNETCORE_ENVIRONMENT = Production
-```
+## Deployment
 
-## 🐛 Troubleshooting
+**Production API:** https://pss-portal-api.onrender.com
 
-### Docker PostgreSQL won't start
+**Swagger:** https://pss-portal-api.onrender.com/swagger
+
+**Hosting:** Render (Web Service + PostgreSQL)
+
+## Tech Stack
+
+### Backend
+- ASP.NET Core 8
+- Entity Framework Core
+- PostgreSQL
+- JWT Authentication
+- FluentValidation
+- Serilog
+- Google.Apis.Sheets.v4
+
+### Frontend
+- React 19
+- Vite 7
+- TypeScript
+- Tailwind CSS 4
+- React Router
+
+## Troubleshooting
+
+### Port 5432/5433 already in use
+The project uses port **5434** to avoid conflicts. If issues persist:
 ```bash
-# Check if Docker Desktop is running
-docker ps
+netstat -ano | findstr :543
+```
 
-# If container exists but stopped
-docker compose start
-
-# If having issues, recreate
-docker compose down
+### Docker volume issues
+```bash
+docker compose down -v
 docker compose up -d
 ```
 
 ### Build errors
 ```bash
-# Clean and rebuild
-dotnet clean
-dotnet restore
-dotnet build
+dotnet clean && dotnet restore && dotnet build
 ```
 
-### Can't install dotnet-ef
-- Use Visual Studio's Package Manager Console instead
-- Or use migration bundles (see Step 2 above)
+## Documentation
 
-## 📚 Technologies Used
+- `daily-documentation/DAY-8-COMPLETION-REPORT.md` - Latest progress
+- `daily-documentation/NEXT-STEPS.md` - Roadmap
+- `ENTERPRISE-LEADGEN-CRM-RESEARCH.md` - Architecture research
+- `LANDING-PAGE-DEV-PLAN.md` - Frontend guide
 
-- **.NET 8.0** - LTS release
-- **ASP.NET Core 8.0** - Web API framework
-- **Entity Framework Core 8.0** - ORM
-- **PostgreSQL 16** - Database
-- **ASP.NET Core Identity** - User management
-- **JWT Bearer** - Token authentication
-- **FluentValidation** - Input validation
-- **Serilog** - Structured logging
-- **Swagger/OpenAPI** - API documentation
+## License
 
-## 🎯 What's Next (Post-Deployment)
-
-Once deployed, you can extend this with:
-- Audits management endpoints
-- Findings tracking
-- File uploads
-- Activity logs
-- Email notifications
-- Frontend (Next.js)
-
-See `PSS_Portal_Master_Plan.md` for the complete roadmap.
-
-## 📞 Support
-
-If you encounter issues:
-1. Check Docker is running
-2. Check PostgreSQL is accessible: `psql -h localhost -U cap -d cap_dev`
-3. Check build output for errors
-4. Review logs in console output
-
----
-
-**Status**: ✅ Ready for migration and testing
-**Next Milestone**: Deployed to Azure (Day 5)
-**Built with**: .NET 8, PostgreSQL, JWT, Clean Architecture
+Private - Personal Software Solutions

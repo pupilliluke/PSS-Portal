@@ -15,6 +15,9 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<Finding> Findings => Set<Finding>();
     public DbSet<ActivityLog> ActivityLogs => Set<ActivityLog>();
     public DbSet<Attachment> Attachments => Set<Attachment>();
+    public DbSet<Lead> Leads => Set<Lead>();
+    public DbSet<GoogleConnection> GoogleConnections => Set<GoogleConnection>();
+    public DbSet<LeadImportBatch> LeadImportBatches => Set<LeadImportBatch>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -62,6 +65,29 @@ public class AppDbContext : IdentityDbContext<AppUser>
             b.HasIndex(x => x.OrganizationId);
             b.HasIndex(x => x.AuditId);
             b.HasIndex(x => x.StorageKey).IsUnique();
+        });
+
+        // Lead
+        builder.Entity<Lead>(b =>
+        {
+            b.HasIndex(x => x.OrganizationId);
+            b.HasIndex(x => new { x.OrganizationId, x.Status });
+            b.HasIndex(x => new { x.OrganizationId, x.Email });
+            b.HasIndex(x => x.ImportBatchId);
+        });
+
+        // GoogleConnection
+        builder.Entity<GoogleConnection>(b =>
+        {
+            b.HasIndex(x => new { x.UserId, x.OrganizationId }).IsUnique();
+            b.HasIndex(x => x.OrganizationId);
+        });
+
+        // LeadImportBatch
+        builder.Entity<LeadImportBatch>(b =>
+        {
+            b.HasIndex(x => x.OrganizationId);
+            b.HasIndex(x => new { x.OrganizationId, x.CreatedAt });
         });
     }
 }
