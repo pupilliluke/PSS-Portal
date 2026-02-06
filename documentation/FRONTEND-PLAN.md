@@ -284,9 +284,17 @@ interface AuthState {
 #### 3.2 Navigation Structure
 ```
 Dashboard
-├── Overview (stats, recent activity)
+├── Overview (leads stats, pipeline, recent activity)
 │
-Audits
+Leads (NEW - Primary CRM module)
+├── All Leads (list with filters)
+├── Create Lead
+└── Lead Detail
+    ├── Contact Info
+    ├── Activity Timeline
+    └── Notes
+│
+Audits (Legacy)
 ├── All Audits (list with filters)
 ├── Create Audit
 └── Audit Detail
@@ -295,7 +303,7 @@ Audits
     ├── Attachments
     └── Activity Log
 │
-Findings
+Findings (Legacy)
 ├── All Findings (global view with filters)
 └── Finding Detail
 │
@@ -303,8 +311,8 @@ Activity
 ├── Activity Log (filterable)
 │
 Settings
-├── Profile
-└── Organization (future)
+├── Billing (Stripe integration)
+└── Profile
 ```
 
 #### 3.3 Route Configuration
@@ -402,6 +410,81 @@ export const useDeleteAudit = () =>
     onSuccess: () => queryClient.invalidateQueries(['audits'])
   });
 ```
+
+---
+
+### Phase 5.5: Leads Module (IMPLEMENTED)
+
+#### 5.5.1 Leads List Page
+| Feature | Implementation |
+|---------|----------------|
+| List view | Card layout with contact info |
+| Filtering | By status, source, search |
+| Sorting | By date |
+| Search | Full-text search on name/email/company |
+
+#### 5.5.2 Lead Statuses
+| Status | Color | Description |
+|--------|-------|-------------|
+| New | Blue | Fresh lead, not contacted |
+| Contacted | Yellow | Initial contact made |
+| Qualified | Purple | Lead qualified as opportunity |
+| Converted | Green | Converted to customer |
+| Lost | Gray | Lead lost/disqualified |
+
+#### 5.5.3 Lead Sources
+- Website
+- Referral
+- GoogleSheets (imported)
+- Manual
+- Advertisement
+- Other
+
+#### 5.5.4 Create/Edit Lead
+| Field | Type | Validation |
+|-------|------|------------|
+| First Name | Text | Required |
+| Last Name | Text | Required |
+| Email | Email | Required, valid email |
+| Phone | Text | Optional |
+| Company | Text | Optional |
+| Source | Dropdown | Required |
+| Notes | Textarea | Optional |
+
+#### 5.5.5 TanStack Query Hooks
+```typescript
+// useLeads.ts
+export const useLeads = (filters?: LeadsFilters) =>
+  useQuery(['leads', filters], () => leadsApi.list(filters));
+
+export const useLead = (id: string) =>
+  useQuery(['lead', id], () => leadsApi.get(id));
+
+export const useCreateLead = () =>
+  useMutation(leadsApi.create, {
+    onSuccess: () => queryClient.invalidateQueries(['leads'])
+  });
+
+export const useUpdateLead = () =>
+  useMutation(leadsApi.update, {
+    onSuccess: () => queryClient.invalidateQueries(['leads'])
+  });
+
+export const useDeleteLead = () =>
+  useMutation(leadsApi.delete, {
+    onSuccess: () => queryClient.invalidateQueries(['leads'])
+  });
+```
+
+#### 5.5.6 Dashboard Integration
+The dashboard displays leads-focused metrics:
+- Total Leads count with trend
+- New Leads awaiting contact
+- Conversion rate
+- Pipeline value estimate
+- Recent leads list
+- Leads by status (progress bars)
+- Leads by source (icons)
 
 ---
 
