@@ -1,6 +1,6 @@
 # PSS Portal - Next Steps & Project Status
 
-**Last Updated**: January 26, 2026
+**Last Updated**: January 28, 2026
 
 ---
 
@@ -18,6 +18,9 @@
 - [x] Landing page with full marketing sections
 - [x] Dashboard UI shell
 - [x] Auth pages (Login, Register)
+- [x] **Leads CRM module**
+- [x] **Google Sheets import**
+- [x] **Stripe billing integration**
 
 ### Project Pivot
 The PSS Portal has evolved from a consulting audit tool to an **Enterprise Lead Generation CRM Portal** with:
@@ -31,25 +34,28 @@ The PSS Portal has evolved from a consulting audit tool to an **Enterprise Lead 
 
 ## Implementation Roadmap
 
-### Phase 1: Billing & Service Framework (Iteration 3) - **NEXT**
+### Phase 1: Billing & Service Framework (Iteration 3) - **COMPLETE**
 **Priority**: Critical
-**Status**: Planning
+**Status**: Done
 
-- [ ] Stripe integration
-- [ ] Subscriptions & invoices
-- [ ] Service paywall middleware
-- [ ] Checkout flow
-- [ ] Customer portal
-- [ ] Pricing page UI
+- [x] Stripe integration (Stripe.net v50.2.0)
+- [x] Subscriptions & invoices (database entities + API)
+- [x] Service paywall middleware (RequiresService attribute)
+- [x] Checkout flow (Stripe Checkout Sessions)
+- [x] Customer portal (Stripe Billing Portal)
+- [x] Pricing page UI (/pricing)
+- [x] Billing settings page (/app/settings/billing)
+- [x] Webhook handling (7 event types)
 
-**Plan**: `daily-documentation/DAY-8-ITERATION-3-BILLING.md`
+**Documentation**: `documentation/BILLING.md`
 
 ---
 
-### Phase 2: Core CRM Foundation (Iteration 4)
+### Phase 2: Core CRM Foundation (Iteration 4) - **NEXT**
 **Priority**: Critical
+**Status**: Leads complete, Contacts/Accounts/Opportunities pending
 
-- [ ] Leads entity & API
+- [x] Leads entity & API (complete with Google Sheets import)
 - [ ] Contacts entity & API
 - [ ] Accounts entity & API
 - [ ] Opportunities & pipeline
@@ -198,8 +204,15 @@ The PSS Portal has evolved from a consulting audit tool to an **Enterprise Lead 
 
 ---
 
-## Test Account
+## Test Accounts
 
+### Local Development
+```
+Email: test@pssportal.com
+Password: TestPass1234@
+```
+
+### Production (Render)
 ```
 Email: iteration2test@pssportal.com
 Password: TestPass1234!
@@ -211,11 +224,11 @@ Password: TestPass1234!
 
 | Document | Purpose |
 |----------|---------|
+| `documentation/BILLING.md` | Stripe billing integration guide |
+| `documentation/API-TESTING-GUIDE.md` | API testing reference |
+| `documentation/FRONTEND-PLAN.md` | Frontend architecture |
 | `ENTERPRISE-LEADGEN-CRM-RESEARCH.md` | Full research & architecture |
-| `LANDING-PAGE-DEV-PLAN.md` | Landing page development guide |
-| `PSS_Portal_Master_Plan.md` | Original project plan (outdated) |
-| `daily-documentation/DAY-8-ITERATION-3-BILLING.md` | Current iteration plan |
-| `daily-documentation/API-TESTING-GUIDE.md` | API testing reference |
+| `PSS_Portal_Master_Plan.md` | Original project plan |
 
 ---
 
@@ -259,4 +272,4 @@ npm run dev
 
 ---
 
-**Next Action**: Start Phase 1 - Billing & Service Framework
+**Next Action**: Continue Phase 2 - Core CRM (Contacts, Accounts, Opportunities)

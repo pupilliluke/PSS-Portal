@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
+  Users,
   ClipboardCheck,
   Search,
   Activity,
@@ -9,6 +10,7 @@ import {
   LogOut,
   ChevronLeft,
   Menu,
+  CreditCard,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/stores/uiStore'
@@ -18,6 +20,7 @@ import { Avatar } from '@/components/ui/avatar'
 
 const navigation = [
   { name: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard },
+  { name: 'Leads', href: '/app/leads', icon: Users },
   { name: 'Audits', href: '/app/audits', icon: ClipboardCheck },
   { name: 'Findings', href: '/app/findings', icon: Search },
   { name: 'Activity', href: '/app/activity', icon: Activity },
@@ -25,6 +28,7 @@ const navigation = [
 ]
 
 const bottomNavigation = [
+  { name: 'Billing', href: '/app/settings/billing', icon: CreditCard },
   { name: 'Settings', href: '/app/settings', icon: Settings },
 ]
 

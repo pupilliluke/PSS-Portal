@@ -17,11 +17,14 @@ const AuditsPage = lazy(() => import('@/pages/audits/AuditsPage').then(m => ({ d
 const AuditDetailPage = lazy(() => import('@/pages/audits/AuditDetailPage').then(m => ({ default: m.AuditDetailPage })))
 const CreateAuditPage = lazy(() => import('@/pages/audits/CreateAuditPage').then(m => ({ default: m.CreateAuditPage })))
 const EditAuditPage = lazy(() => import('@/pages/audits/EditAuditPage').then(m => ({ default: m.EditAuditPage })))
+const LeadsPage = lazy(() => import('@/pages/leads/LeadsPage').then(m => ({ default: m.LeadsPage })))
 const FindingsPage = lazy(() => import('@/pages/findings/FindingsPage').then(m => ({ default: m.FindingsPage })))
 const FindingDetailPage = lazy(() => import('@/pages/findings/FindingDetailPage').then(m => ({ default: m.FindingDetailPage })))
 const CreateFindingPage = lazy(() => import('@/pages/findings/CreateFindingPage').then(m => ({ default: m.CreateFindingPage })))
 const ActivityPage = lazy(() => import('@/pages/ActivityPage').then(m => ({ default: m.ActivityPage })))
 const AttachmentsPage = lazy(() => import('@/pages/AttachmentsPage').then(m => ({ default: m.AttachmentsPage })))
+const PricingPage = lazy(() => import('@/pages/PricingPage').then(m => ({ default: m.PricingPage })))
+const BillingPage = lazy(() => import('@/pages/settings/BillingPage').then(m => ({ default: m.BillingPage })))
 
 // Create query client with sensible defaults
 const queryClient = new QueryClient({
@@ -90,6 +93,14 @@ function App() {
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route
+                path="/pricing"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <PricingPage />
+                  </Suspense>
+                }
+              />
 
               {/* Protected routes */}
               <Route
@@ -107,6 +118,16 @@ function App() {
                   element={
                     <Suspense fallback={<PageLoader />}>
                       <DashboardPage />
+                    </Suspense>
+                  }
+                />
+
+                {/* Leads */}
+                <Route
+                  path="leads"
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <LeadsPage />
                     </Suspense>
                   }
                 />
@@ -191,14 +212,14 @@ function App() {
                   }
                 />
 
-                {/* Settings - placeholder */}
+                {/* Settings */}
+                <Route path="settings" element={<Navigate to="/app/settings/billing" replace />} />
                 <Route
-                  path="settings"
+                  path="settings/billing"
                   element={
-                    <div className="text-center py-12">
-                      <h2 className="text-2xl font-bold mb-2">Settings</h2>
-                      <p className="text-muted-foreground">Coming soon</p>
-                    </div>
+                    <Suspense fallback={<PageLoader />}>
+                      <BillingPage />
+                    </Suspense>
                   }
                 />
               </Route>

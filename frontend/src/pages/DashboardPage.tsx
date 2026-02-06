@@ -1,27 +1,97 @@
 import { Link } from 'react-router-dom'
 import {
-  ClipboardCheck,
-  Search,
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
+  Users,
+  UserPlus,
+  UserCheck,
+  TrendingUp,
   ArrowRight,
   Plus,
-  TrendingUp,
+  Clock,
+  Mail,
+  Phone,
+  Building2,
+  DollarSign,
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { EmptyState } from '@/components/ui/empty-state'
-import { useAudits } from '@/hooks/useAudits'
-import { useFindings } from '@/hooks/useFindings'
-import { useActivity } from '@/hooks/useActivity'
-import { formatRelativeTime } from '@/lib/utils'
-import { STATUS_COLORS, SEVERITY_COLORS } from '@/lib/constants'
-import type { Audit, Finding, ActivityLog } from '@/api/types'
 
-// Stats Card Component - Microsoft Fluent style
+// Fake lead data for demonstration
+const fakeLeads = [
+  {
+    id: '1',
+    firstName: 'Sarah',
+    lastName: 'Johnson',
+    email: 'sarah.johnson@techcorp.com',
+    phone: '(555) 123-4567',
+    company: 'TechCorp Industries',
+    source: 'Website',
+    status: 'Qualified',
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: '2',
+    firstName: 'Michael',
+    lastName: 'Chen',
+    email: 'mchen@innovate.io',
+    phone: '(555) 234-5678',
+    company: 'Innovate.io',
+    source: 'Referral',
+    status: 'New',
+    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: '3',
+    firstName: 'Emily',
+    lastName: 'Rodriguez',
+    email: 'emily.r@globalsoft.com',
+    phone: '(555) 345-6789',
+    company: 'GlobalSoft Solutions',
+    source: 'GoogleSheets',
+    status: 'Contacted',
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: '4',
+    firstName: 'James',
+    lastName: 'Wilson',
+    email: 'jwilson@enterprise.co',
+    phone: '(555) 456-7890',
+    company: 'Enterprise Co',
+    source: 'Advertisement',
+    status: 'New',
+    createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: '5',
+    firstName: 'Amanda',
+    lastName: 'Taylor',
+    email: 'ataylor@startup.xyz',
+    phone: '(555) 567-8901',
+    company: 'Startup XYZ',
+    source: 'Website',
+    status: 'Converted',
+    createdAt: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
+  },
+]
+
+const fakeActivity = [
+  { id: '1', action: 'New lead added', user: 'You', lead: 'Sarah Johnson', time: '2 hours ago' },
+  { id: '2', action: 'Status changed to Contacted', user: 'You', lead: 'Emily Rodriguez', time: '5 hours ago' },
+  { id: '3', action: 'Note added', user: 'You', lead: 'Michael Chen', time: '1 day ago' },
+  { id: '4', action: 'Lead converted', user: 'You', lead: 'Amanda Taylor', time: '2 days ago' },
+  { id: '5', action: 'Imported 15 leads', user: 'System', lead: 'Google Sheets', time: '3 days ago' },
+]
+
+const STATUS_COLORS: Record<string, string> = {
+  New: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+  Contacted: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+  Qualified: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+  Converted: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+  Lost: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+}
+
+// Stats Card Component
 function StatsCard({
   title,
   value,
@@ -53,11 +123,11 @@ function StatsCard({
         {trend && (
           <div className="flex items-center gap-1 mt-2">
             <TrendingUp
-              className={`h-3 w-3 ${trend.positive ? 'text-success' : 'text-destructive'}`}
+              className={`h-3 w-3 ${trend.positive ? 'text-green-500' : 'text-red-500'}`}
               aria-hidden="true"
             />
             <span
-              className={`text-xs ${trend.positive ? 'text-success' : 'text-destructive'}`}
+              className={`text-xs ${trend.positive ? 'text-green-500' : 'text-red-500'}`}
             >
               {trend.positive ? '+' : ''}{trend.value}% from last month
             </span>
@@ -68,51 +138,29 @@ function StatsCard({
   )
 }
 
-// Recent Audits Component
-function RecentAudits({ audits, isLoading }: { audits?: Audit[]; isLoading: boolean }) {
-  if (isLoading) {
-    return (
-      <div className="space-y-3">
-        {[...Array(3)].map((_, i) => (
-          <Skeleton key={i} className="h-16 w-full" />
-        ))}
-      </div>
-    )
-  }
-
-  if (!audits || audits.length === 0) {
-    return (
-      <EmptyState
-        icon={ClipboardCheck}
-        title="No audits yet"
-        description="Create your first audit to get started"
-        action={
-          <Button asChild size="sm">
-            <Link to="/audits/new">
-              <Plus className="h-4 w-4 mr-1" aria-hidden="true" />
-              Create Audit
-            </Link>
-          </Button>
-        }
-      />
-    )
-  }
-
+// Recent Leads Component
+function RecentLeads() {
   return (
     <div className="space-y-3">
-      {audits.slice(0, 5).map((audit) => (
+      {fakeLeads.slice(0, 5).map((lead) => (
         <Link
-          key={audit.id}
-          to={`/audits/${audit.id}`}
+          key={lead.id}
+          to={`/app/leads/${lead.id}`}
           className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
         >
           <div className="min-w-0 flex-1">
-            <p className="font-medium truncate">{audit.title}</p>
-            <p className="text-sm text-muted-foreground">
-              {formatRelativeTime(audit.updatedAt)}
+            <p className="font-medium">
+              {lead.firstName} {lead.lastName}
             </p>
+            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Building2 className="h-3 w-3" aria-hidden="true" />
+                {lead.company}
+              </span>
+              <span className="text-xs bg-muted px-1.5 py-0.5 rounded">{lead.source}</span>
+            </div>
           </div>
-          <Badge className={STATUS_COLORS[audit.status]}>{audit.status}</Badge>
+          <Badge className={STATUS_COLORS[lead.status]}>{lead.status}</Badge>
         </Link>
       ))}
     </div>
@@ -120,58 +168,26 @@ function RecentAudits({ audits, isLoading }: { audits?: Audit[]; isLoading: bool
 }
 
 // Recent Activity Component
-function RecentActivity({ activities, isLoading }: { activities?: ActivityLog[]; isLoading: boolean }) {
-  if (isLoading) {
-    return (
-      <div className="space-y-3">
-        {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-12 w-full" />
-        ))}
-      </div>
-    )
-  }
-
-  if (!activities || activities.length === 0) {
-    return (
-      <EmptyState
-        icon={Clock}
-        title="No activity yet"
-        description="Activity will appear here as you make changes"
-      />
-    )
-  }
-
-  const getActionIcon = (action: string) => {
-    switch (action) {
-      case 'Created':
-        return <Plus className="h-4 w-4 text-green-500" aria-hidden="true" />
-      case 'Updated':
-      case 'StatusChanged':
-        return <Clock className="h-4 w-4 text-blue-500" aria-hidden="true" />
-      case 'Deleted':
-        return <AlertTriangle className="h-4 w-4 text-red-500" aria-hidden="true" />
-      default:
-        return <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-    }
-  }
-
+function RecentActivity() {
   return (
     <div className="space-y-3">
-      {activities.slice(0, 10).map((activity) => (
+      {fakeActivity.map((activity) => (
         <div
           key={activity.id}
           className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
         >
-          <div className="mt-1">{getActionIcon(activity.action)}</div>
+          <div className="mt-1">
+            <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm">
-              <span className="font-medium">{activity.userEmail}</span>{' '}
+              <span className="font-medium">{activity.action}</span>{' '}
               <span className="text-muted-foreground">
-                {activity.action.toLowerCase()} a {activity.entityType.toLowerCase()}
+                - {activity.lead}
               </span>
             </p>
             <p className="text-xs text-muted-foreground">
-              {formatRelativeTime(activity.timestamp)}
+              {activity.time}
             </p>
           </div>
         </div>
@@ -180,107 +196,84 @@ function RecentActivity({ activities, isLoading }: { activities?: ActivityLog[];
   )
 }
 
-// Findings Summary Component
-function FindingsSummary({ findings, isLoading }: { findings?: Finding[]; isLoading: boolean }) {
-  if (isLoading) {
-    return (
-      <div className="space-y-3">
-        {[...Array(3)].map((_, i) => (
-          <Skeleton key={i} className="h-10 w-full" />
-        ))}
-      </div>
-    )
+// Leads by Status Component
+function LeadsByStatus() {
+  const statusCounts = {
+    New: 12,
+    Contacted: 8,
+    Qualified: 5,
+    Converted: 15,
+    Lost: 3,
   }
 
-  if (!findings || findings.length === 0) {
-    return (
-      <EmptyState
-        icon={Search}
-        title="No findings yet"
-        description="Findings will appear here once you create audits"
-      />
-    )
-  }
-
-  // Group by severity
-  const bySeverity = findings.reduce(
-    (acc, f) => {
-      acc[f.severity] = (acc[f.severity] || 0) + 1
-      return acc
-    },
-    {} as Record<string, number>
-  )
-
-  // Group by status
-  const byStatus = findings.reduce(
-    (acc, f) => {
-      acc[f.status] = (acc[f.status] || 0) + 1
-      return acc
-    },
-    {} as Record<string, number>
-  )
+  const total = Object.values(statusCounts).reduce((a, b) => a + b, 0)
 
   return (
     <div className="space-y-4">
-      {/* By Severity */}
-      <div>
-        <h4 className="text-sm font-medium mb-2">By Severity</h4>
-        <div className="flex gap-2 flex-wrap">
-          {['High', 'Medium', 'Low'].map((severity) => (
-            <Badge
-              key={severity}
-              className={SEVERITY_COLORS[severity as keyof typeof SEVERITY_COLORS]}
-            >
-              {severity}: {bySeverity[severity] || 0}
-            </Badge>
-          ))}
+      {Object.entries(statusCounts).map(([status, count]) => (
+        <div key={status} className="flex items-center gap-3">
+          <div className="w-24 text-sm font-medium">{status}</div>
+          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+            <div
+              className={`h-full ${
+                status === 'Converted' ? 'bg-green-500' :
+                status === 'Qualified' ? 'bg-purple-500' :
+                status === 'Contacted' ? 'bg-yellow-500' :
+                status === 'Lost' ? 'bg-gray-400' :
+                'bg-blue-500'
+              }`}
+              style={{ width: `${(count / total) * 100}%` }}
+            />
+          </div>
+          <div className="w-8 text-sm text-muted-foreground text-right">{count}</div>
         </div>
-      </div>
+      ))}
+    </div>
+  )
+}
 
-      {/* By Status */}
-      <div>
-        <h4 className="text-sm font-medium mb-2">By Status</h4>
-        <div className="flex gap-2 flex-wrap">
-          {['Identified', 'InProgress', 'Resolved'].map((status) => (
-            <Badge
-              key={status}
-              className={STATUS_COLORS[status as keyof typeof STATUS_COLORS]}
-            >
-              {status}: {byStatus[status] || 0}
-            </Badge>
-          ))}
+// Leads by Source Component
+function LeadsBySource() {
+  const sourceCounts = [
+    { source: 'Website', count: 18, icon: '🌐' },
+    { source: 'Referral', count: 12, icon: '🤝' },
+    { source: 'Google Sheets', count: 8, icon: '📊' },
+    { source: 'Advertisement', count: 5, icon: '📢' },
+  ]
+
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      {sourceCounts.map(({ source, count, icon }) => (
+        <div
+          key={source}
+          className="flex items-center gap-3 p-3 rounded-lg border bg-card"
+        >
+          <span className="text-2xl">{icon}</span>
+          <div>
+            <p className="text-2xl font-semibold">{count}</p>
+            <p className="text-sm text-muted-foreground">{source}</p>
+          </div>
         </div>
-      </div>
+      ))}
     </div>
   )
 }
 
 export function DashboardPage() {
-  const { data: audits, isLoading: auditsLoading } = useAudits()
-  const { data: findings, isLoading: findingsLoading } = useFindings()
-  const { data: activities, isLoading: activitiesLoading } = useActivity({ limit: 10 })
-
-  // Calculate stats
-  const totalAudits = audits?.length || 0
-  const activeAudits = audits?.filter((a) => a.status === 'InProgress' || a.status === 'InReview').length || 0
-  const totalFindings = findings?.length || 0
-  const resolvedFindings = findings?.filter((f) => f.status === 'Resolved').length || 0
-  const highSeverity = findings?.filter((f) => f.severity === 'High' && f.status !== 'Resolved').length || 0
-
   return (
     <div className="space-y-6">
-      {/* Header - Microsoft style */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">Dashboard</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Overview of your consulting audits and findings
+            Overview of your leads and sales pipeline
           </p>
         </div>
         <Button asChild>
-          <Link to="/audits/new">
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            New Audit
+          <Link to="/app/leads/new">
+            <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
+            New Lead
           </Link>
         </Button>
       </div>
@@ -288,53 +281,53 @@ export function DashboardPage() {
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
-          title="Total Audits"
-          value={auditsLoading ? '—' : totalAudits}
-          description={`${activeAudits} active`}
-          icon={ClipboardCheck}
+          title="Total Leads"
+          value={43}
+          description="12 this month"
+          icon={Users}
+          trend={{ value: 23, positive: true }}
         />
         <StatsCard
-          title="Total Findings"
-          value={findingsLoading ? '—' : totalFindings}
-          description={`${resolvedFindings} resolved`}
-          icon={Search}
+          title="New Leads"
+          value={12}
+          description="Awaiting contact"
+          icon={UserPlus}
+          trend={{ value: 15, positive: true }}
         />
         <StatsCard
-          title="High Priority"
-          value={findingsLoading ? '—' : highSeverity}
-          description="Unresolved findings"
-          icon={AlertTriangle}
+          title="Converted"
+          value={15}
+          description="35% conversion rate"
+          icon={UserCheck}
+          trend={{ value: 8, positive: true }}
         />
         <StatsCard
-          title="Resolution Rate"
-          value={
-            findingsLoading || totalFindings === 0
-              ? '—'
-              : `${Math.round((resolvedFindings / totalFindings) * 100)}%`
-          }
-          description="Findings resolved"
-          icon={CheckCircle2}
+          title="Pipeline Value"
+          value="$127K"
+          description="Estimated revenue"
+          icon={DollarSign}
+          trend={{ value: 12, positive: true }}
         />
       </div>
 
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Recent Audits */}
+        {/* Recent Leads */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Recent Audits</CardTitle>
-              <CardDescription>Your latest audit activities</CardDescription>
+              <CardTitle>Recent Leads</CardTitle>
+              <CardDescription>Your latest lead activities</CardDescription>
             </div>
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/audits">
+              <Link to="/app/leads">
                 View all
                 <ArrowRight className="h-4 w-4 ml-1" aria-hidden="true" />
               </Link>
             </Button>
           </CardHeader>
           <CardContent>
-            <RecentAudits audits={audits} isLoading={auditsLoading} />
+            <RecentLeads />
           </CardContent>
         </Card>
 
@@ -343,36 +336,39 @@ export function DashboardPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest changes across your organization</CardDescription>
+              <CardDescription>Latest changes to your leads</CardDescription>
             </div>
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/activity">
+              <Link to="/app/activity">
                 View all
                 <ArrowRight className="h-4 w-4 ml-1" aria-hidden="true" />
               </Link>
             </Button>
           </CardHeader>
           <CardContent>
-            <RecentActivity activities={activities} isLoading={activitiesLoading} />
+            <RecentActivity />
           </CardContent>
         </Card>
 
-        {/* Findings Overview */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle>Findings Overview</CardTitle>
-              <CardDescription>Summary of all findings by severity and status</CardDescription>
-            </div>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/findings">
-                View all
-                <ArrowRight className="h-4 w-4 ml-1" aria-hidden="true" />
-              </Link>
-            </Button>
+        {/* Leads by Status */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Leads by Status</CardTitle>
+            <CardDescription>Pipeline breakdown by status</CardDescription>
           </CardHeader>
           <CardContent>
-            <FindingsSummary findings={findings} isLoading={findingsLoading} />
+            <LeadsByStatus />
+          </CardContent>
+        </Card>
+
+        {/* Leads by Source */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Leads by Source</CardTitle>
+            <CardDescription>Where your leads are coming from</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <LeadsBySource />
           </CardContent>
         </Card>
       </div>

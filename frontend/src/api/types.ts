@@ -125,6 +125,54 @@ export interface Attachment {
   uploadedByEmail: string
 }
 
+// Lead Types
+export interface Lead {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  phone: string | null
+  company: string | null
+  source: LeadSource
+  status: LeadStatus
+  score: number | null
+  notes: string | null
+  importBatchId: string | null
+  importSourceId: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type LeadSource = 'Website' | 'Referral' | 'GoogleSheets' | 'Manual' | 'Advertisement' | 'Other'
+export type LeadStatus = 'New' | 'Contacted' | 'Qualified' | 'Converted' | 'Lost'
+
+export interface CreateLeadRequest {
+  firstName: string
+  lastName: string
+  email: string
+  phone?: string
+  company?: string
+  source: LeadSource
+  notes?: string
+}
+
+export interface UpdateLeadRequest {
+  firstName: string
+  lastName: string
+  email: string
+  phone?: string
+  company?: string
+  source: LeadSource
+  score?: number
+  notes?: string
+}
+
+export interface LeadsFilters {
+  status?: LeadStatus
+  source?: LeadSource
+  search?: string
+}
+
 // Common Types
 export interface ApiError {
   message: string
@@ -137,4 +185,83 @@ export interface PaginatedResponse<T> {
   pageSize: number
   currentPage: number
   totalPages: number
+}
+
+// Billing Types
+export type ServiceModule =
+  | 'BasicCRM'
+  | 'LeadGeneration'
+  | 'EmailAutomation'
+  | 'SocialInbox'
+  | 'AdvancedAnalytics'
+  | 'Integrations'
+  | 'EnterpriseFeatures'
+
+export interface ServicePlan {
+  service: ServiceModule
+  name: string
+  description: string
+  monthlyPrice: number
+  yearlyPrice: number
+  monthlyPriceId: string
+  yearlyPriceId: string
+  features: string[]
+}
+
+export interface SubscriptionStatus {
+  subscriptionId: string
+  status: string
+  currentPeriodStart: string
+  currentPeriodEnd: string
+  cancelAtPeriodEnd: boolean
+  services: SubscribedService[]
+}
+
+export interface SubscribedService {
+  service: ServiceModule
+  priceId: string
+  quantity: number
+}
+
+export interface Invoice {
+  id: string
+  invoiceNumber: string | null
+  status: string
+  amountDue: number
+  amountPaid: number
+  currency: string
+  dueDate: string | null
+  paidAt: string | null
+  hostedInvoiceUrl: string | null
+  invoicePdfUrl: string | null
+  createdAt: string
+}
+
+export interface PaymentMethod {
+  id: string
+  type: string
+  last4: string | null
+  brand: string | null
+  expMonth: number | null
+  expYear: number | null
+  isDefault: boolean
+}
+
+export interface CheckoutRequest {
+  services: ServiceModule[]
+  successUrl: string
+  cancelUrl: string
+}
+
+export interface CheckoutResponse {
+  sessionId: string
+  url: string
+}
+
+export interface PortalRequest {
+  returnUrl: string
+}
+
+export interface PortalResponse {
+  url: string
 }

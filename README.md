@@ -4,7 +4,7 @@ A multi-tenant CRM platform with lead management, Google Sheets integration, and
 
 ## Project Status
 
-**Current Phase:** Leads Module Complete, Billing Next
+**Current Phase:** Billing Integration Complete
 
 - [x] Authentication (JWT, refresh tokens)
 - [x] Multi-tenant organizations
@@ -13,7 +13,7 @@ A multi-tenant CRM platform with lead management, Google Sheets integration, and
 - [x] File attachments
 - [x] **Leads CRM module**
 - [x] **Google Sheets import**
-- [ ] Stripe billing (Phase 1)
+- [x] **Stripe billing integration**
 - [ ] Core CRM - Contacts, Accounts, Opportunities (Phase 2)
 
 ## Quick Start
@@ -37,34 +37,55 @@ This starts PostgreSQL on **port 5434** with:
 
 > **Note:** Port 5434 is used to avoid conflicts with local PostgreSQL installations.
 
-### 2. Run the API
+### 2. Run the Backend (API)
 
 ```bash
 dotnet run --project src/CAP.Api
 ```
 
 The API starts on:
-- **http://localhost:5000** (or check console output)
+- **http://localhost:5298** (check console output to confirm)
 - Migrations apply automatically on startup
 
-### 3. Open Swagger UI
+### 3. Run the Frontend
 
-http://localhost:5000/swagger
+Open a **new terminal** and run:
 
-### 4. Test the API
+```bash
+cd frontend
+npm install   # first time only
+npm run dev
+```
+
+The frontend starts on:
+- **http://localhost:5173**
+
+### 4. Open in Browser
+
+- **Frontend:** http://localhost:5173
+- **Swagger UI:** http://localhost:5298/swagger
+
+### 5. Test the API
 
 ```bash
 # Health check
-curl http://localhost:5000/health
+curl http://localhost:5298/health
 
 # Register a new user
-curl -X POST http://localhost:5000/api/auth/register \
+curl -X POST http://localhost:5298/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"Test1234!","organizationName":"My Company"}'
 ```
 
-## Test Account (Production)
+## Test Accounts
 
+### Local Development
+```
+Email: test@pssportal.com
+Password: TestPass1234@
+```
+
+### Production (Render)
 ```
 Email: iteration2test@pssportal.com
 Password: TestPass1234!
@@ -116,12 +137,27 @@ Password: TestPass1234!
 | GET | `/api/activity/audits/{id}` | Activity for audit |
 | GET/POST/DELETE | `/api/attachments/*` | File attachments |
 
+### Billing (6)
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/billing/services` | Public | List service plans with pricing |
+| GET | `/api/billing/subscription` | JWT | Get current subscription |
+| GET | `/api/billing/invoices` | JWT | Get invoice history |
+| GET | `/api/billing/payment-methods` | JWT | Get payment methods |
+| POST | `/api/billing/checkout` | Owner/Admin | Create Stripe checkout |
+| POST | `/api/billing/portal` | Owner/Admin | Create Stripe portal session |
+
+### Webhooks (1)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/webhooks/stripe` | Handle Stripe events |
+
 ### System (1)
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/health` | Health check |
 
-**Total: 32 endpoints**
+**Total: 40 endpoints**
 
 ## Project Structure
 
@@ -132,23 +168,36 @@ PSS Portal/
 │   │   ├── Controllers/
 │   │   │   ├── AuthController.cs
 │   │   │   ├── LeadsController.cs
-│   │   │   ├── LeadImportsController.cs
+│   │   │   ├── BillingController.cs
+│   │   │   ├── WebhooksController.cs
 │   │   │   └── ...
+│   │   ├── Middleware/
+│   │   │   └── ServiceAccessMiddleware.cs
 │   │   └── Program.cs
 │   ├── CAP.Domain/              # Entities
 │   │   └── Entities/
 │   │       ├── Lead.cs
-│   │       ├── GoogleConnection.cs
+│   │       ├── Subscription.cs
+│   │       ├── Invoice.cs
 │   │       └── ...
 │   ├── CAP.Application/         # Interfaces
 │   │   └── Common/
 │   │       ├── ICurrentOrg.cs
-│   │       └── IGoogleSheetsService.cs
+│   │       ├── IBillingService.cs
+│   │       └── IStripeService.cs
 │   └── CAP.Infrastructure/      # Implementations
 │       ├── Data/AppDbContext.cs
-│       └── Google/GoogleSheetsService.cs
+│       ├── Google/GoogleSheetsService.cs
+│       └── Billing/
+│           ├── BillingService.cs
+│           └── StripeService.cs
 ├── frontend/                    # React 19 + Vite
-├── daily-documentation/         # Progress reports
+│   └── src/
+│       ├── pages/
+│       │   ├── PricingPage.tsx
+│       │   └── settings/BillingPage.tsx
+│       └── api/billing.ts
+├── documentation/               # Guides & docs
 ├── docker-compose.yml
 └── README.md
 ```
@@ -170,6 +219,11 @@ PSS Portal/
   "Google": {
     "ClientId": "",
     "ClientSecret": ""
+  },
+  "Stripe": {
+    "SecretKey": "sk_test_...",
+    "PublishableKey": "pk_test_...",
+    "WebhookSecret": "whsec_..."
   }
 }
 ```
@@ -179,7 +233,7 @@ PSS Portal/
 1. Create Google Cloud project
 2. Enable Google Sheets API and Google Drive API
 3. Create OAuth 2.0 credentials (Web application)
-4. Add redirect URI: `http://localhost:5000/api/lead-imports/google/callback`
+4. Add redirect URI: `http://localhost:5298/api/lead-imports/google/callback`
 5. Add ClientId and ClientSecret to config
 
 ## Deployment
@@ -200,6 +254,7 @@ PSS Portal/
 - FluentValidation
 - Serilog
 - Google.Apis.Sheets.v4
+- Stripe.net (v50.2.0)
 
 ### Frontend
 - React 19
@@ -207,6 +262,7 @@ PSS Portal/
 - TypeScript
 - Tailwind CSS 4
 - React Router
+- TanStack Query (React Query)
 
 ## Troubleshooting
 
@@ -229,10 +285,11 @@ dotnet clean && dotnet restore && dotnet build
 
 ## Documentation
 
-- `daily-documentation/DAY-8-COMPLETION-REPORT.md` - Latest progress
-- `daily-documentation/NEXT-STEPS.md` - Roadmap
-- `ENTERPRISE-LEADGEN-CRM-RESEARCH.md` - Architecture research
-- `LANDING-PAGE-DEV-PLAN.md` - Frontend guide
+- `documentation/BILLING.md` - Stripe billing integration guide
+- `documentation/API-TESTING-GUIDE.md` - API testing with curl
+- `documentation/FRONTEND-PLAN.md` - Frontend architecture
+- `documentation/NEXT-STEPS.md` - Roadmap
+- `documentation/daily/` - Daily progress reports
 
 ## License
 
